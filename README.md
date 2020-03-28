@@ -3,7 +3,7 @@ Visit [GetUsPPE](https://getusppe.org/) and [findthemasks](https://findthemasks.
 **Installing python environment**
 ```bash
 conda create --name getusppe python=3.7
-source activate getusppe
+conda activate getusppe
 pip install -r requirements.txt
 ```
 
