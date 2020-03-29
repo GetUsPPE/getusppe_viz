@@ -1,0 +1,68 @@
+﻿Location,State/Local Government,Non-Profit,For-Profit,Total
+United States,0.3,1.7,0.4,2.4
+Alabama,1.4,0.8,0.9,3.1
+Alaska,0.3,1.5,0.4,2.2
+Arizona,0.1,1.3,0.5,1.9
+Arkansas,0.3,2.2,0.7,3.2
+California,0.3,1.2,0.3,1.8
+Colorado,0.4,1.1,0.4,1.9
+Connecticut,0.1,2,N/A,2
+Delaware,N/A,2.1,0,2.2
+District of Columbia,N/A,3.5,0.9,4.4
+Florida,0.4,1.3,0.9,2.6
+Georgia,0.3,1.8,0.3,2.4
+Hawaii,0.3,1.7,N/A,1.9
+Idaho,0.4,1.1,0.4,1.9
+Illinois,0.1,2.2,0.2,2.5
+Indiana,0.4,1.9,0.4,2.7
+Iowa,0.9,2,0.1,3
+Kansas,1.1,1.4,0.8,3.3
+Kentucky,0.4,2.4,0.5,3.2
+Louisiana,0.8,1.7,0.8,3.3
+Maine,0.1,2.4,0.1,2.5
+Maryland,N/A,1.9,0,1.9
+Massachusetts,0,1.8,0.4,2.3
+Michigan,0.1,2.2,0.3,2.5
+Minnesota,0.3,2.2,N/A,2.5
+Mississippi,1.6,1.6,0.8,4
+Missouri,0.4,2.2,0.4,3.1
+Montana,0.1,3,0.2,3.3
+Nebraska,0.5,2.9,0.1,3.6
+Nevada,0.2,0.7,1.3,2.1
+New Hampshire,N/A,1.7,0.3,2.1
+New Jersey,N/A,2.1,0.3,2.4
+New Mexico,0.3,0.7,0.7,1.8
+New York,0.5,2.2,N/A,2.7
+North Carolina,0.6,1.3,0.1,2.1
+North Dakota,N/A,4.2,0.1,4.3
+Ohio,0.3,2.4,0.2,2.8
+Oklahoma,0.5,1.5,0.8,2.8
+Oregon,0.2,1.4,0.1,1.6
+Pennsylvania,0,2.5,0.3,2.9
+Rhode Island,N/A,1.9,0.2,2.1
+South Carolina,0.6,1.1,0.7,2.4
+South Dakota,0.2,4.3,0.2,4.8
+Tennessee,0.5,1.6,0.8,2.9
+Texas,0.3,1,1,2.3
+Utah,0.3,1,0.6,1.8
+Vermont,N/A,2.1,N/A,2.1
+Virginia,0.2,1.5,0.5,2.1
+Washington,0.4,1.2,0.1,1.7
+West Virginia,0.4,2.8,0.7,3.8
+Wisconsin,0,2,0.1,2.1
+Wyoming,2.6,0.5,0.4,3.5
+,,,,
+Notes,,,,
+"Data include staffed beds for community hospitals, which represent 85% of all hospitals.",,,,
+,,,,
+Figures may not sum to totals due to rounding.,,,,
+,,,,
+Sources,,,,
+"1999 - 2018 AHA Annual Survey, Copyright 2019 by Health Forum, LLC, an affiliate of the American Hospital Association. Special data request, 2019. Available at [http://www.ahaonlinestore.com](https://ams.aha.org/eweb/DynamicPage.aspx?WebCode=ProdDetailAdd&ivd_prc_prd_key=165f9fbf-d766-40a9-96a6-a212aed366bb).",,,,
+,,,,
+"Population data from Annual Population Estimates by State, U.S. Census Bureau; available at [http://www.census.gov/popest/](http://www.census.gov/popest/).",,,,
+,,,,
+Definitions,,,,
+"*Community Hospitals:* All nonfederal, short-term general, and specialty hospitals whose facilities and services are available to the public.",,,,
+,,,,
+"*N/A*: Not applicable when state/local government, non-profit, or for-profit hospitals do not exist in the state.",,,,
