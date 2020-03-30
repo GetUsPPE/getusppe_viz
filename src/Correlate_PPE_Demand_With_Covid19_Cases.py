@@ -371,7 +371,7 @@ counties_with_ppe_requests_and_covid_cases = covid_ppe_df[covid_ppe_df.PPE_reque
 
 # join with the dataframe that has covid cases per hospital bed
 covid_ppe_df = counties_with_ppe_requests_and_covid_cases.join(
-    covid_per_bed_df[['county','state','fips','BEDS','Covid_cases_per_bed']].set_index('fips'),
+    covid_per_bed_df[['county','state','fips','Covid_cases_per_bed','BEDS',]].set_index('fips'),
     on='fips',  how='left', lsuffix='', rsuffix='_ppe')
 
 # sort by highest normalized_covid_patients_per_bed
