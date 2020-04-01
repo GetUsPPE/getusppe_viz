@@ -1,5 +1,4 @@
-# Getting started
-Visit [GetUsPPE](https://getusppe.org/) and [findthemasks](https://findthemasks.com/give.html). 
+# Getting started: Visit [GetUsPPE](https://getusppe.org/) 
 **Installing python environment**
 ```bash
 conda create --name getusppe python=3.7
@@ -7,18 +6,11 @@ conda activate getusppe
 pip install -r requirements.txt
 ```
 
-## Projects
-- Hospital Status and PPE Needs: Jennifer (Current mock)
-![Alt text](img/Hospital_Status_and_PPE_Needs.png?raw=true "Hospital_Status_and PPE_Needs.png")
-<p align="left">
-    <b></b><br>
-</p>
-
-- Heat maps of PPE requests: Brian and Ian
-![Alt text](img/Heat_Maps_of_PPE_requests.png?raw=true "Heat_Maps_of_PPE_requests.png")
-
-- Colocalization of COVID19 Cases and PPE Requests: Matt, Nick and Keyon
-![Alt text](img/Colocalization_of_COVID19_Cases_and_PPE_Requests.png?raw=true "Colocalization_of_COVID19_Cases_and_PPE_Requests.png")
+## Examples
+- [PPE Requests per county](https://getusppe.github.io/PPE_Requests_Per_County/)
+- [Hospital beds per county](https://getusppe.github.io/Hospital_bed_per_county/)
+- [Covid19 cases per county](https://getusppe.github.io/Covid19_Cases_Per_County/)
+- [Hazard Ratio](https://getusppe.github.io/Hazard_Ratio_Possible_PPE_Need_Covid19/)
 
 ## Data Snapshots
 Note: These are not kept up to date, but can be used as a reference or testing
