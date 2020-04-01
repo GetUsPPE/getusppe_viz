@@ -1,5 +1,5 @@
 from geocode import geocoder
-import pandas as pandas
+import pandas as pd
 import time
 import requests
 import json
@@ -40,7 +40,7 @@ def add_fips_county_info(mask_df, geocoder):
     return mask_df
 
 
-def download_county_geojson(geojson_url):
+def download_county_geojson_and_merge_df(geojson_url, mask_df_counties):
     # Download the data
     s=requests.get(geojson_url).text
 
@@ -73,9 +73,9 @@ def download_county_geojson(geojson_url):
         columns={'counts':'PPE_requests'})
     
     # Map fips state code to state name
-    merged_df['STATE'] = merged_df.progress_apply(
+    merged_df['STATE'] = merged_df.apply(
         lambda x: us.states.lookup(x['STATE']), axis=1)
-    merged_df['county_info_for_map'] = merged_df.progress_apply(
+    merged_df['county_info_for_map'] = merged_df.apply(
         lambda x: ('PPE Requests: %s, %s'%(x['county'],x['STATE'])), axis=1)
     
     # Create text column for use in mapping

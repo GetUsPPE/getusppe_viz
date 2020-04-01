@@ -5,7 +5,8 @@ def choropleth_mapbox_usa_plot (counties, locations, z, text,
                                 colorscale = "RdBu_r", zmin=-1, zmax=10, 
                                 title='choropleth_mapbox_usa_plot',
                                 colorbar_title = 'count',
-                                html_filename='plot.html'):
+                                html_filename='plot.html',
+                                show_fig=True):
     
     # Choropleth graph. For reference: https://plotly.com/python/mapbox-county-choropleth/
     fig = go.Figure(go.Choroplethmapbox(
@@ -20,11 +21,12 @@ def choropleth_mapbox_usa_plot (counties, locations, z, text,
         mapbox_style="carto-positron",
         mapbox_zoom=3.5, 
         mapbox_center = {"lat": 37.0902, "lon": -95.7129},
-        margin={"r":300,"t":30,"l":30,"b":0},
+        margin={"r":100,"t":30,"l":30,"b":0},
     )
     
     # Show the figure
-    fig.show()
+    if show_fig:
+        fig.show()
     
     # Download the figure
     plot(fig, filename=html_filename)
