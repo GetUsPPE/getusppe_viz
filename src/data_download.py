@@ -1,0 +1,89 @@
+import requests
+import pandas as pd
+import json
+import time
+import addfips
+
+def download_findthemasks_data(url,request_headers):
+    # Download the data
+    s=requests.get(url, headers= request_headers).text
+
+    # Extract the json format, and find column headers
+    json_data = json.loads(s)
+    HEADERS = json_data['values'][0]
+
+    # create the data frame
+    mask_df = pd.DataFrame.from_dict(json_data['values'][2:])
+    mask_df.columns=HEADERS
+    
+    # Using DataFrame.drop
+    mask_df = mask_df.dropna(how='any', subset=['Lat', 'Lng'])
+
+    # Rename the State? column
+    mask_df.rename(columns={'State?': 'State'}, inplace=True)
+
+    # Drop institutions with multiple entries
+    mask_df.drop_duplicates(subset='What is the name of the hospital or clinic?', inplace=True)
+
+    # Rename long column header: drop off instructions
+    mask_df.rename(columns={'Drop off instructions, eg curbside procedure or mailing address. If you want donors to email or call you, please include contact info that can be made public in this field:': 'Drop_Off_Instructions'}, inplace=True)
+
+    return mask_df
+
+
+def download_nytimes_data(url, date, write_out_csv = True):
+    covid_df = pd.read_csv(url)
+    covid_df = covid_df.loc[covid_df['date'] == date]
+
+    # NYC data is missing county, so make them all New York County.
+    covid_df.loc[covid_df['county'] == 'New York City', 'fips'] = '36061'
+    # Kansas City data is missing the specific county so make them all Cook County
+    covid_df.loc[(covid_df['county'] == 'Kansas City') & 
+              (covid_df['state'] == 'Missouri'), 'fips'] = '29095'
+    
+    # drop the rows without a fips value
+    covid_df = covid_df.dropna(how='any', subset=['fips'])
+
+    # convert to int to remove the decimal values
+    covid_df['fips'] = covid_df['fips'].apply(int)
+    
+    # Zfill all countyFIPS to be 5 characters
+    width=5
+    covid_df["fips"]= covid_df["fips"].astype(str)
+    covid_df["fips"]= covid_df["fips"].str.zfill(width) 
+        
+    # write out this data file to csv
+    if write_out_csv:
+        timestr = time.strftime("%Y%m%d")
+        path = 'COVID19_nytimes_' + date + ' data_processed_on_' + timestr + '.csv'
+        covid_df.to_csv (path, index = False, header=True)
+
+    return covid_df
+
+
+def download_hospital_data(url, write_out_csv = True):
+    hospital_df = pd.read_csv(url)
+
+    # TODO: Move this processing code probably into data processing class
+    
+    # TODO: Leverage geocoder class instead of this code
+    af = addfips.AddFIPS()
+
+    # Reverse geocoder used to get geocoded fips and county information
+    # Note: Progress_apply is used for the timer functionality
+    hospital_df['fips'] = hospital_df.apply(
+        lambda x: af.get_county_fips(x['COUNTY'], x['STATE']), axis=1)
+    
+    # clean the BEDS column to make sure all are positive in value, by converting negative beds to 0
+    hospital_df.sort_values(by=['BEDS'], ascending=False, inplace=True)
+    hospital_df['BEDS'][hospital_df['BEDS'] < 0] = 0
+    
+    # write out this data file to csv
+    if write_out_csv:
+        timestr = time.strftime("%Y%m%d")
+        path = 'hospital_data_processed_' + timestr + '.csv'
+        hospital_df.to_csv (path, index = False, header=True)
+
+    return hospital_df
+
+
