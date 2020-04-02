@@ -203,6 +203,28 @@ def find_counties_with_covid19_and_no_ppe_request(covid_df, mask_df_counties):
     
     return covid_ppe_df
 
+def add_all_ppe_requests_to_merged_df(mask_df,merged_df):
+    # get all fips code in the mask_df frame
+    unique_fips=mask_df.fips.unique()
+
+    for fip in unique_fips:
+        # get all entries that have the same fip code and convert to dict, then string
+        value = json.dumps(mask_df[mask_df['fips']==fip].to_dict())
+
+        # select rows where the fips code equals fip
+        merged_df.loc[merged_df['fips'] == str(fip),'all_ppe_requests']=value
+
+        # fill the NA in normalized_covid_patients_per_bedwith 0s
+        merged_df['all_ppe_requests'].fillna(0, inplace=True)
+        
+        # How to pull array of dicts from 'all_ppe_requests' category
+        ''' 
+        all_ppe_locations_array= eval(str(merged_df.loc[
+            merged_df['fips'] == '01073', 'all_ppe_requests'].values))
+        '''
+        
+    return merged_df
+
 
 
 
