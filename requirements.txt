@@ -14,4 +14,4 @@ reverse-geocoder==1.5.1
 scipy==1.4.1
 shapely==1.7.0
 tqdm==4.43.0
-us=1.0.0
+us==1.0.0
