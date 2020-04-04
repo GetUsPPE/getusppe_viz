@@ -13,7 +13,7 @@ def requests_per_county(mask_df, write_out_csv = True):
     if write_out_csv:
         timestr = time.strftime("%Y%m%d")
         path = 'findthemasks_data_processed_' + timestr + '.csv'
-        mask_df.to_csv (path, index = False, header=True)
+        mask_df_counties.to_csv (path, index = False, header=True)
 
         ##### TODO
         # Some of the data written out is corrupted and misaligned by row

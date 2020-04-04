@@ -28,5 +28,5 @@ def choropleth_mapbox_usa_plot (counties, locations, z, text,
     if show_fig:
         fig.show()
     
-    # Download the figure
-    plot(fig, filename=html_filename)
+    # Download the figure From Sunny Mui
+    go.Figure.write_html(fig, file=html_filename, config={'responsive': True}, include_plotlyjs='cdn')
