@@ -87,3 +87,44 @@ def download_hospital_data(url, write_out_csv = True):
     return hospital_df
 
 
+def download_PPE_donors(url='https://docs.google.com/spreadsheet/ccc?key=1sW5jAik3olWGWtIC_i3khBEO6Hltj5SfzyM9mDoTeUc&output=csv'):
+    ppe_donors_df = pd.read_csv(url)
+    
+    # Rename the column
+    ppe_donors_df.rename(inplace=True, columns={
+        'Institution or Affiliation': 'Affiliation',
+        'Zip Code':'zip'
+    })
+    
+    # Zfill all countyFIPS to be 5 characters
+    width=5
+    ppe_donors_df["zip"]= ppe_donors_df["zip"].astype(str)
+    ppe_donors_df["zip"]= ppe_donors_df["zip"].str.zfill(width) 
+    
+    # Clean the data by dropping rows that are missing name, instituion, zip code
+    ppe_donors_df = ppe_donors_df.dropna(how='any', subset=['zip', 'Name'])
+    
+    # Make the zip column a string
+    ppe_donors_df['zip']=ppe_donors_df['zip'].astype(str)
+    
+    # Clean the data by dropping columns that are not needed
+    ppe_donors_df.drop(['State'],axis=1, inplace=True)
+    
+    return ppe_donors_df
+
+
+def download_zip_to_fips_data(url='https://docs.google.com/spreadsheet/ccc?key=1XivjeJ-NaTiVJYhEXYoCONI_6aZHlKAp5v3qUb6gZd4&output=csv'):
+    zip_fips_df = pd.read_csv(url)
+    
+    # remove the word county from all counties
+    zip_fips_df["county"] = zip_fips_df["county"].str.replace(" County", "")
+    
+    # map the zip to a string to join later
+    zip_fips_df['zip']=zip_fips_df['zip'].astype(str)
+    
+    # Clean the data by dropping columns that are not needed
+    zip_fips_df.drop(['classfp'],axis=1, inplace=True)
+    
+    return zip_fips_df
+   
+

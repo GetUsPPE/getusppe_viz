@@ -226,6 +226,132 @@ def add_all_ppe_requests_to_merged_df(mask_df,merged_df):
     return merged_df
 
 
+def add_fips_ppe_donors(ppe_donors_df, zip_fips_df):
+    # zfill the fips to make sure they are right
+    width=5
+    zip_fips_df["fips"]= zip_fips_df["fips"].astype(str)
+    zip_fips_df["fips"]= zip_fips_df["fips"].str.zfill(width) 
+    zip_fips_df["zip"]= zip_fips_df["zip"].astype(str)
+    zip_fips_df["zip"]= zip_fips_df["zip"].str.zfill(width) 
+    
+    # join the ppe_donors with the zip code to add fips, state, county info
+    ppe_donors_with_zip_df = ppe_donors_df.join(zip_fips_df.set_index('zip'),
+                                         how='left',on='zip', lsuffix='donors', rsuffix='zip')
+    
+    # Clean the data by dropping rows that are missing fips
+    ppe_donors_with_zip_df = ppe_donors_with_zip_df.dropna(how='any', subset=['fips'])  
+    
+    # join the ppe_donors with the zip code to add fips, state, county info
+    ppe_donors_with_zip_df = ppe_donors_with_zip_df.join(zip_lat_long_df.set_index('zip'),
+                                         how='left',on='zip', lsuffix='donors', rsuffix='lat_lon')
+    
+    # Clean the data by dropping rows that are missing lat lon
+    ppe_donors_with_zip_df = ppe_donors_with_zip_df.dropna(how='any', subset=['lat'])  
+    
+    return ppe_donors_with_zip_df
+
+def donors_per_county(ppe_donors_with_zip_df, 
+    merged_covid_ppe_hosp_df, write_out_csv = True):
+    # Count the amount of requests per county
+    donors_df_counties=ppe_donors_with_zip_df.groupby(['fips']).size().reset_index(name='ppe_donors')
+    
+    # merge the donors with the larger dataframe
+    merged_covid_ppe_hosp_donors_df = merged_covid_ppe_hosp_df.join(
+        donors_df_counties[['fips','ppe_donors']].set_index('fips'),
+        on='fips',  how='left', lsuffix='merged', rsuffix='donors')
+    
+    # fill the NA in counts with 0s
+    merged_covid_ppe_hosp_donors_df['ppe_donors'].fillna(0, inplace=True)
+    
+    # Create text column for use in mapping
+    merged_covid_ppe_hosp_donors_df['ppe_donors_requests_text'] = merged_covid_ppe_hosp_donors_df['county'].astype(str) + ', ' + \
+        merged_covid_ppe_hosp_donors_df['STATE'].astype(str) + '<br><br>'+\
+        'PPE Donors:' + merged_covid_ppe_hosp_donors_df['ppe_donors'].astype(int).astype(str) + '<br>'+ \
+        'PPE Requests:' + merged_covid_ppe_hosp_donors_df['PPE_requests'].astype(int).astype(str) + '<br><br>'+ \
+        'Covid19: ' + '<br>'+ \
+        'Cases: ' + merged_covid_ppe_hosp_donors_df['cases'].astype(int).astype(str) + '<br>'+ \
+        'Deaths: ' + merged_covid_ppe_hosp_donors_df['deaths'].astype(int).astype(str) + '<br><br>' + \
+        'HAZARD RATIO (Cases/Bed): ' + merged_covid_ppe_hosp_donors_df['Covid_cases_per_bed'].astype(float).astype(str) 
+
+    return merged_covid_ppe_hosp_donors_df
+
+# In order to avoid divide by zero problem in lambda function within calculate_donor_per_requester
+def weird_division_for_donor_per_requester(n, d):
+    if n ==0:
+        return 'NA'
+    return n / d if d else 0
+
+def calculate_donor_per_requester(merged_covid_ppe_hosp_donors_df):
+    # calculate the covid patients per bed, adding the column that saves this info
+    merged_covid_ppe_hosp_donors_df['PPE_Donor_Per_Requester'] = merged_covid_ppe_hosp_donors_df.apply(
+            lambda x: (weird_division_for_donor_per_requester(x['ppe_donors'], x['PPE_requests'])), axis=1)
+    
+    # Create text column for use in mapping
+    merged_covid_ppe_hosp_donors_df['ppe_donors_requests_ratio_text'] = merged_covid_ppe_hosp_donors_df['county'].astype(str) + ', ' + \
+        merged_covid_ppe_hosp_donors_df['STATE'].astype(str) + '<br><br>'+\
+        'GetUsPPE Donors per Requester: ' + merged_covid_ppe_hosp_donors_df['PPE_Donor_Per_Requester'].astype(str) + '<br>'+\
+        'PPE Donors: ' + merged_covid_ppe_hosp_donors_df['ppe_donors'].astype(int).astype(str) + '<br>'+ \
+        'PPE Requests: ' + merged_covid_ppe_hosp_donors_df['PPE_requests'].astype(int).astype(str) + '<br><br>'+ \
+        'Covid19: ' + '<br>'+ \
+        'Cases: ' + merged_covid_ppe_hosp_donors_df['cases'].astype(int).astype(str) + '<br>'+ \
+        'Deaths: ' + merged_covid_ppe_hosp_donors_df['deaths'].astype(int).astype(str) + '<br><br>' + \
+        'HAZARD RATIO (Cases/Bed): ' + merged_covid_ppe_hosp_donors_df['Covid_cases_per_bed'].astype(float).astype(str) 
+    
+    # TODO
+    # Make idempotent, can't be run twice currently
+    
+    return merged_covid_ppe_hosp_donors_df
+
+
+# Taking original mask_df from the findthemasks website, rename to current convention
+def create_requestor_df_for_querying_requesters(mask_df, merged_covid_ppe_hosp_df):
+    requestor_info_df = mask_df.rename(columns={
+        'Lat':'lat',
+        'Lng':'lon',
+        'What is the name of the hospital or clinic?':'institution',
+        'Street address for dropoffs?':'address',
+        'City':'city',
+        "Write drop-off instructions below or paste a link to your organization's own page containing instructions. For written instructions, please include details such as curbside procedure, mailing address, email address, and/or phone number. Please note all information entered here will be made public.": 'instructions',
+        'What do you need?' : 'need',
+        'fips':'fips'
+    })
+
+    ### Merge on the hazard index
+    requestor_info_df = pd.merge(requestor_info_df, 
+        merged_covid_ppe_hosp_df[['fips','Covid_cases_per_bed']], on='fips', how='left')
+
+    requestor_info_df = requestor_info_df.rename(
+        columns={'Covid_cases_per_bed':'Hazard_Index_Covid_Cases_Per_Hosp_Bed'})
+
+    #df = pd.merge(df,df2[['Key_Column','Target_Column']],on='Key_Column', how='left')
+
+
+    # make sure lat long are float 
+    requestor_info_df['lat'] = pd.to_numeric(requestor_info_df['lat'], errors='coerce')
+    requestor_info_df['lon'] = pd.to_numeric(requestor_info_df['lon'], errors='coerce')
+
+    # Clean the data by dropping rows that are missing lat lon
+    requestor_info_df = requestor_info_df.dropna(how='any', subset=['lat']) 
+    requestor_info_df = requestor_info_df.dropna(how='any', subset=['lon']) 
+    
+    '''EXAMPLE HOW TO USE
+    # select lat long from the donors list 
+    row = ppe_donors_with_zip_df.loc[ppe_donors_with_zip_df['Name'] == 'Kate Clancy']
+    v = {'lat': row['lat'].iloc[0], 'lon': row['lon'].iloc[0]}
+
+    # Pul Top 5 closest donors to location
+    k5_closest(
+        requestor_info_df[['institution','address','city','instructions','need','lat','lon']].to_dict('records'),
+        v)
+    '''
+    
+    return requestor_info_df
+
+
+
+
+
+
 
 
 

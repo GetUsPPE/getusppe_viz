@@ -1,5 +1,6 @@
 import plotly.graph_objects as go
 from plotly.offline import plot
+import plotly.express as px
 
 def choropleth_mapbox_usa_plot (counties, locations, z, text,
                                 colorscale = "RdBu_r", zmin=-1, zmax=10, 
@@ -30,3 +31,40 @@ def choropleth_mapbox_usa_plot (counties, locations, z, text,
     
     # Download the figure From Sunny Mui
     go.Figure.write_html(fig, file=html_filename, config={'responsive': True}, include_plotlyjs='cdn')
+
+
+def viz_correlation_ppe_request_covid19_cases(merged_covid_ppe_hosp_df):
+    # select counties that have had at least 1 ppe request
+    counties_with_ppe_requests_and_covid_cases = merged_covid_ppe_hosp_df[
+        merged_covid_ppe_hosp_df.PPE_requests != 0]
+
+    # sort by highest normalized_covid_patients_per_bed
+    counties_with_ppe_requests_and_covid_cases.sort_values(by=['PPE_requests','cases'], ascending=False, inplace=True)
+    counties_with_ppe_requests_and_covid_cases.head(5)
+
+    fig = px.scatter(
+        counties_with_ppe_requests_and_covid_cases,
+        x=counties_with_ppe_requests_and_covid_cases.cases, 
+        y=counties_with_ppe_requests_and_covid_cases.PPE_requests,
+        color='Covid_cases_per_bed',
+        log_x=True,
+        #log_y=True,
+        labels={
+            'Covid_cases_per_bed':'Covid19 cases per hospital bed',
+            'x':'Covid19 Cases Per County',
+            'y':'PPE Requests Per County',
+            'text':'County'
+            },
+        hover_name=counties_with_ppe_requests_and_covid_cases.county,
+        range_color=(0,1),
+        range_x=(1,30000)
+        )
+
+    fig.update_layout(
+        title = "Correlation of PPE request per county with COVID19 cases",
+        #hoverlabel={'text'},
+        )
+    
+    fig.show()
+
+
