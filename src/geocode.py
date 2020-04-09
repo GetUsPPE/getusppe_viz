@@ -33,7 +33,7 @@ class geocoder:
             # return the fip and county
             return {'fips':fips, 'county':county}
         except ValueError:
-            return {'fips':'NA', 'county':'NA'}
+            return {'fips':'NA', 'county':'NA'}  # dropna() may not drop 'NA'
 
     def get_geocoder_info_from_rg_vector(self, Lats, Lngs):
         """Returns a column of the form [{'fips': fips, 'county': county}]"""
