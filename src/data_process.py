@@ -22,6 +22,51 @@ def requests_per_county(mask_df, write_out_csv = True):
     return mask_df_counties
 
 
+def is_coordinates(lat, lng):
+    """checks whether inputs are actually coordinates"""
+    try:
+        float(lat)   # TODO check whether value is within a range
+        float(lng)
+        return True
+    except ValueError:
+        return False
+
+def add_fips_county_info_v2(mask_df, geocoder):
+    """add FIPS based on Lat and Lng, and remove rows that could not be mapped"""
+
+    # remove rows that we know cannot be mapped
+    mask_df.loc[:,'is_coordinates'] = mask_df.apply(
+        lambda x: is_coordinates(x['Lat'], x['Lng']), axis=1)
+    print ('Removing {} rows which lack coordinates.'.format(
+            len(mask_df) - mask_df['is_coordinates'].sum()))
+    mask_df = mask_df[mask_df.loc[:,'is_coordinates']].copy()
+
+    # get nearest county and fips on entire vectors
+    print ('Pulling geocodes from Lat+Lng.')
+    mask_df.loc[:,'geocoder'] = geocoder.get_geocoder_info_from_rg_vector(mask_df['Lat'],
+                                                                          mask_df['Lng'])
+    # compare with old method
+    # caution: this line may take several minutes to run
+    #mask_df['geocoder_old'] = mask_df.apply(
+    #    lambda x: geocoder.get_geocoder_info_from_rg(x['Lat'], x['Lng']), axis=1)
+    #print('Results of old geocoding method is same as new: {}'.format(
+    #      all(mask_df['geocoder_old'] == mask_df['geocoder'])))
+    #mask_df.drop(columns=['geocoder_old'], inplace=True)
+
+    # Map the geocoder dict column to individual columns
+    mask_df.loc[:, 'fips'] = mask_df.apply(
+        lambda x: x['geocoder']['fips'], axis=1)
+    mask_df.loc[:, 'county'] = mask_df.apply(
+        lambda x: x['geocoder']['county'], axis=1)
+    mask_df.drop(columns=['geocoder', 'is_coordinates'], inplace=True)
+
+    # Using DataFrame.drop to remove any fips code that could not be mapped
+    # (no longer necessary due to earlier filter)
+    mask_df.dropna(how='any', subset=['fips','county'], inplace=True)
+
+    return mask_df
+
+
 def add_fips_county_info(mask_df, geocoder):
     print ('Pulling geocodes from Lat+Lng. This will take awhile...')
     mask_df['geocoder'] = mask_df.apply(
