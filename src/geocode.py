@@ -33,4 +33,27 @@ class geocoder:
             # return the fip and county
             return {'fips':fips, 'county':county}
         except ValueError:
-            return {'fips':'NA', 'county':'NA'}
+            return {'fips':'NA', 'county':'NA'}  # dropna() may not drop 'NA'
+
+    def get_geocoder_info_from_rg_vector(self, Lats, Lngs):
+        """Returns a column of the form [{'fips': fips, 'county': county}]"""
+        # Reverse geocoder api call to get county names
+        results = rg.search(list(zip(Lats, Lngs))) # default mode = 2
+        fips_not_found_count = 0
+        fips_info_list = []
+        for res in results:
+            county = res['admin2']
+            state = res['admin1']
+
+            try:
+                # Lookup of fips code (https://github.com/fitnr/addfips)
+                current_fips = self.fips_code_lookup(county, state)
+
+                # add the fip and county
+                fips_info_list.append({'fips':current_fips, 'county':county})
+            except ValueError:
+                fips_not_found_count += 1
+                fips_info_list.append({'fips':'NA', 'county':'NA'})
+        if fips_not_found_count:
+            print('{} fips were not found.'.format(fips_not_found_count))
+        return fips_info_list
