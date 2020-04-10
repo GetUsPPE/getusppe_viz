@@ -31,6 +31,7 @@ def is_coordinates(lat, lng):
     except ValueError:
         return False
 
+
 def add_fips_county_info_v2(mask_df, geocoder):
     """add FIPS based on Lat and Lng, and remove rows that could not be mapped"""
 
@@ -43,8 +44,8 @@ def add_fips_county_info_v2(mask_df, geocoder):
 
     # get nearest county and fips on entire vectors
     print ('Pulling geocodes from Lat+Lng.')
-    mask_df.loc[:,'geocoder'] = geocoder.get_geocoder_info_from_rg_vector(mask_df['Lat'],
-                                                                          mask_df['Lng'])
+    mask_df.loc[:,'geocoder'] = geocoder.get_geocoder_info_from_rg_vector(
+    mask_df['Lat'], mask_df['Lng'])
     # compare with old method
     # caution: this line may take several minutes to run
     #mask_df['geocoder_old'] = mask_df.apply(
