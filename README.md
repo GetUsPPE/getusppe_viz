@@ -18,21 +18,20 @@ conda activate getusppe
 pip install -r requirements.txt
 ```
 
-## Using the package
-##### Sample code to pull live findthemasks data into pandas
-```python
-import json, requests
-import pandas as pd
-# Specify URL and also headers (findthemasks requires browser headers)
-url = 'http://findthemasks.com/data.json'
-headers = {"User-Agent": "Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/41.0.2228.0 Safari/537.3"}
-# Download the data
-s=requests.get(url, headers= headers).text
-# Extract the json format, and find column headers
-json_data = json.loads(s)
-HEADERS = json_data['values'][0]
-print(HEADERS)
-# create the data frame
-mask_df = pd.DataFrame.from_dict(json_data['values'][2:])
-mask_df.columns=HEADERS
+## Data Acess
+- **Open Access Data**: GetUsPPE.org is partnered with [#findthemasks](https://findthemasks.com/give.html). To use this data (3000+ PPE Requests), go to src/config.ini, and change the find_the_masks_data_download_flag to True:
 ```
+find_the_masks_data_download_flag = True
+```
+- **Request-Only Access Data**: GetUsPPE.org has an additional dataset that compromises quantitative demand side information (i.e. Nursing Home X requests 20 Face Shields, with less than 2 days supppy remaining). To use this dataset, please reach out to GetUsPPE.org for access, then change
+```
+find_the_masks_data_download_flag = False
+```
+
+## Sample code to create the figures
+Navigate to getusppe_viz/src
+```python
+python create_figures.py
+```
+- Interested in exploring all of the data, [checkout this notebook](https://github.com/GetUsPPE/getusppe_viz/blob/master/notebooks/mattr/Correlation_PPE_Demand_With_Covid19_Cases_v2.ipynb)
+- Interested in exploring the quantitative supply side data (this requires data to be requested), [checkout this notebook](https://github.com/GetUsPPE/getusppe_viz/blob/master/notebooks/mattr/New%20Survey%20Analysis%20-%20MattR%20Edits.ipynb)
