@@ -4,7 +4,7 @@ import json
 import time
 import addfips
 
-def download_findthemasks_data(url,request_headers):
+def download_findthemasks_data(url,request_headers, write_out_csv=False):
     # Download the data
     s=requests.get(url, headers= request_headers).text
 
@@ -28,6 +28,12 @@ def download_findthemasks_data(url,request_headers):
     # Rename long column header: drop off instructions
     mask_df.rename(columns={'Drop off instructions, eg curbside procedure or mailing address. If you want donors to email or call you, please include contact info that can be made public in this field:': 'Drop_Off_Instructions'}, inplace=True)
 
+    # Download a local copy of the find the masks json object
+    if write_out_csv == True:
+        timestr = time.strftime("%Y%m%d")
+        path = 'find_the_mask_json_' + timestr + '.csv'
+        mask_df.to_csv (path, index = False, header=True)
+    
     return mask_df
 
 
@@ -60,6 +66,10 @@ def download_nytimes_data(url, date, write_out_csv = True):
 
     return covid_df
 
+def remove_negative_values_replace_with_zero(n):
+    if n < 0:
+        return 0
+    return n
 
 def download_hospital_data(url, write_out_csv = True):
     hospital_df = pd.read_csv(url)
@@ -72,12 +82,12 @@ def download_hospital_data(url, write_out_csv = True):
     # Reverse geocoder used to get geocoded fips and county information
     # Note: Progress_apply is used for the timer functionality
     hospital_df['fips'] = hospital_df.apply(
-        lambda x: af.get_county_fips(x['COUNTY'], x['STATE']), axis=1)
+        lambda x: (af.get_county_fips(x['COUNTY'], x['STATE'])), axis=1)
     
     # clean the BEDS column to make sure all are positive in value, by converting negative beds to 0
-    hospital_df.sort_values(by=['BEDS'], ascending=False, inplace=True)
-    hospital_df['BEDS'][hospital_df['BEDS'] < 0] = 0
-    
+    hospital_df['BEDS'] = hospital_df.apply(
+        lambda x: (remove_negative_values_replace_with_zero(x['BEDS'])), axis=1 )
+
     # write out this data file to csv
     if write_out_csv:
         timestr = time.strftime("%Y%m%d")
@@ -126,5 +136,34 @@ def download_zip_to_fips_data(url='https://docs.google.com/spreadsheet/ccc?key=1
     zip_fips_df.drop(['classfp'],axis=1, inplace=True)
     
     return zip_fips_df
-   
+
+def download_ideo_merged_data(url, zip_fips_df, write_out_csv = True):
+    ideo_df = pd.read_csv(url)
+    
+    # zfill the fips to make sure they are right
+    width=5
+    zip_fips_df["fips"]= zip_fips_df["fips"].astype(str)
+    zip_fips_df["fips"]= zip_fips_df["fips"].str.zfill(width) 
+    zip_fips_df["zip"]= zip_fips_df["zip"].astype(str)
+    zip_fips_df["zip"]= zip_fips_df["zip"].str.zfill(width) 
+    ideo_df["zip"]= ideo_df["zip"].astype(str)
+    ideo_df["zip"]= ideo_df["zip"].str.zfill(width) 
+    
+    # join the ppe_donors with the zip code to add fips, state, county info
+    ideo_df = ideo_df.join(zip_fips_df.set_index('zip'),
+             how='left',on='zip', lsuffix='donors', rsuffix='zip')
+    
+    # Clean the data by dropping rows that are missing fips
+    ideo_df = ideo_df.dropna(how='any', subset=['fips'])  
+    
+    ideo_df.rename(inplace=True, columns={
+        'statezip': 'State', })
+    
+    # write out this data file to csv
+    if write_out_csv:
+        timestr = time.strftime("%Y%m%d")
+        path = 'ideo_data_processed_' + timestr + '.csv'
+        ideo_df.to_csv (path, index = False, header=True)
+
+    return ideo_df
 
