@@ -127,16 +127,12 @@ def merge_covid_ppe_df(covid_df,merged_df):
     # TODO: Merge the counties geojson for all of new york
     '''
     print(counties['features'][0])
-
     # possibly leverage this code to merge polygons
     from shapely.geometry import Polygon
     from shapely.ops import cascaded_union
-
     polygon1 = Polygon([(0, 0), (5, 3), (5, 0)])
     polygon2 = Polygon([(0, 0), (3, 10), (3, 0)])
-
     polygons = [polygon1, polygon2]
-
     u = cascaded_union(polygons)
     '''
         
@@ -181,6 +177,11 @@ def merge_covid_ppe_hosp_df(hospital_df_counties,merged_covid_ppe_df):
 def weird_division(n, d):
     return n / d if d else 0
 
+def weird_division_for_covid_cases_per_ppe(n, d):
+    if d ==0:
+        return 'NA'
+    return n / d if d else 0
+
 def calculate_covid_per_bed_available(merged_covid_ppe_hosp_df):
     # calculate the covid patients per bed, adding the column that saves this info
     merged_covid_ppe_hosp_df['Covid_cases_per_bed'] = merged_covid_ppe_hosp_df.apply(
@@ -192,8 +193,35 @@ def calculate_covid_per_bed_available(merged_covid_ppe_hosp_df):
     # Create text column for use in mapping
     merged_covid_ppe_hosp_df['hosp_text'] = merged_covid_ppe_hosp_df['county'].astype(str) + ', ' + \
         merged_covid_ppe_hosp_df['STATE'].astype(str) + '<br><br>'+ \
-        'HAZARD RATIO (Cases/Bed): ' + merged_covid_ppe_hosp_df['Covid_cases_per_bed'].astype(float).astype(str) + '<br><br>'+ \
+        'COVID19 Cases Per Hospital Bed): ' + merged_covid_ppe_hosp_df['Covid_cases_per_bed'].astype(float).astype(str) + '<br><br>'+ \
         'Hospital Beds: ' + merged_covid_ppe_hosp_df['BEDS'].astype(int).astype(str) + '<br>'+ \
+        '<br>'+ \
+        'COVID19: ' + '<br>'+ \
+        'Cases: ' + merged_covid_ppe_hosp_df['cases'].astype(int).astype(str) + '<br>'+ \
+        'Deaths: ' + merged_covid_ppe_hosp_df['deaths'].astype(int).astype(str) + '<br><br>'+ \
+        'PPE Requests: ' + merged_covid_ppe_hosp_df['PPE_requests'].astype(int).astype(str)
+    
+    return merged_covid_ppe_hosp_df
+
+
+def calculate_covid_cases_per_ppe_request(merged_covid_ppe_hosp_df):
+    # calculate the covid patients per bed, adding the column that saves this info
+    # Only keeping counties with any requests
+    merged_covid_ppe_hosp_df['Covid_cases_per_PPE_requests'] = merged_covid_ppe_hosp_df.apply(
+            lambda x: (weird_division(x['cases'], x['PPE_requests'])), axis=1)
+
+    # Drop the counties with no ppe requests
+    merged_covid_ppe_hosp_df.dropna(
+        how='any', subset=['Covid_cases_per_PPE_requests','PPE_requests'], inplace=True)
+
+    # fill the NA in normalized_covid_patients_per_bedwith 0s
+    merged_covid_ppe_hosp_df['PPE_requests'].fillna(0, inplace=True)
+    merged_covid_ppe_hosp_df['Covid_cases_per_PPE_requests'].fillna(0, inplace=True)
+
+    # Create text column for use in mapping
+    merged_covid_ppe_hosp_df['covid_ppe_text'] = merged_covid_ppe_hosp_df['county'].astype(str) + ', ' + \
+        merged_covid_ppe_hosp_df['STATE'].astype(str) + '<br><br>'+ \
+        'COVID19 Cases Per PPE Request ' + merged_covid_ppe_hosp_df['Covid_cases_per_PPE_requests'].astype(float).astype(str) + '<br><br>'+ \
         '<br>'+ \
         'Covid19: ' + '<br>'+ \
         'Cases: ' + merged_covid_ppe_hosp_df['cases'].astype(int).astype(str) + '<br>'+ \
@@ -201,6 +229,7 @@ def calculate_covid_per_bed_available(merged_covid_ppe_hosp_df):
         'PPE Requests: ' + merged_covid_ppe_hosp_df['PPE_requests'].astype(int).astype(str)
     
     return merged_covid_ppe_hosp_df
+
 
 
 def find_counties_with_covid19_and_no_ppe_request(covid_df, mask_df_counties):
@@ -359,7 +388,6 @@ def create_requestor_df_for_querying_requesters(mask_df, merged_covid_ppe_hosp_d
     # select lat long from the donors list 
     row = ppe_donors_with_zip_df.loc[ppe_donors_with_zip_df['Name'] == 'Kate Clancy']
     v = {'lat': row['lat'].iloc[0], 'lon': row['lon'].iloc[0]}
-
     # Pul Top 5 closest donors to location
     k5_closest(
         requestor_info_df[['institution','address','city','instructions','need','lat','lon']].to_dict('records'),
@@ -367,13 +395,3 @@ def create_requestor_df_for_querying_requesters(mask_df, merged_covid_ppe_hosp_d
     '''
     
     return requestor_info_df
-
-
-
-
-
-
-
-
-
-
