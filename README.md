@@ -23,7 +23,7 @@ pip install -r requirements.txt
 ```
 find_the_masks_data_download_flag = True
 ```
-- **Request-Only Access Data**: GetUsPPE.org has an additional dataset that compromises quantitative demand side information (i.e. Nursing Home X requests 20 Face Shields, with less than 2 days supppy remaining). To use this dataset, please reach out to GetUsPPE.org for access, then change
+- **Request-Only Access Data**: GetUsPPE.org has an additional dataset that compromises quantitative demand side information (i.e. Nursing Home X requests 20 Face Shields, with less than 2 days supppy remaining). To use this dataset, [please reach out to GetUsPPE.org for access](https://docs.google.com/forms/d/e/1FAIpQLSeuTWRkBvPHBPor0bk9entuIKa6W0oCuVnz2-VI_hn_i3hmVQ/viewform?usp=sf_link), Then change:
 ```
 find_the_masks_data_download_flag = False
 ```

@@ -184,7 +184,7 @@ def choropleth_mapbox_layered_plot (counties, html_filename,
     
     # Center on US
     fig.update_layout(
-        title='GetUsPPE.org - 04/18/2020',
+        title='GetUsPPE.org',
         mapbox_style="carto-positron",
         mapbox_zoom=3.5, 
         mapbox_center = {"lat": 37.0902, "lon": -95.7129},
