@@ -3,6 +3,7 @@ import json, requests
 import configparser
 import os, sys, time
 import os.path as path
+from datetime import date
 
 # computing
 import pandas as pd
@@ -143,6 +144,12 @@ if __name__ == '__main__':
     # Calculate covid cases per ppe request
     merged_covid_ppe_hosp_df = calculate_covid_cases_per_ppe_request(merged_covid_ppe_hosp_df) 
 
+    # write out final csv
+    merged_covid_ppe_hosp_df[['fips', 'GEO_ID', 'STATE', 'county', 
+     'CENSUSAREA', 'PPE_requests', 'cases', 'deaths', 'BEDS', 
+     'Covid_cases_per_bed', 'Covid_cases_per_PPE_requests']].to_csv(
+        'merged_df_%s.csv' % str(date.today()), index=False) 
+    
     print ('Mapping covid19 hazard index by cases and bed availability')
     choropleth_mapbox_usa_plot(
         counties = counties,
