@@ -1,11 +1,5 @@
 # Getting started: [GetUsPPE](https://getusppe.org/) 
 
-## [Examples](https://getusppe.org/data)
-- [PPE Requests per county](https://getusppe.github.io/PPE_Requests_Per_County/)
-- [Hospital beds per county](https://getusppe.github.io/Hospital_bed_per_county/)
-- [Covid19 cases per county](https://getusppe.github.io/Covid19_Cases_Per_County/)
-- [Hazard Ratio](https://getusppe.github.io/Hazard_Ratio_Possible_PPE_Need_Covid19/)
-
 ## Repo Format 
 - **src**: Python classes and functions for data downloading, processing and mapping
 - **notebooks**: Example code from repo contributors
