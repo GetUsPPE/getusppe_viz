@@ -9,7 +9,7 @@ numpy==1.18.2
 pandas==1.0.3
 pgeocode==0.2.1
 plotly==4.5.4
-requests==2.23.0
+requests==2.31.0
 reverse-geocoder==1.5.1
 seaborn==0.10.0
 scipy==1.4.1
